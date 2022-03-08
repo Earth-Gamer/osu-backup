@@ -17,12 +17,12 @@ except:
 		""")
 	sys.exit()
 
-# # Вытаскиваем код карты
-# while i <= MAPCOUNT:
-# 	for mapname in MAPLIST: 				# Поочередно выбираем карту
-# 		splitter = mapname.split(' ') 		# Разделяем название карты по пробелам
-# 		MAP_ID.append(splitter[0])  		# добавляем первое значение в список
-# 	i += 1 									# Переходим к следующей карте
+# Вытаскиваем код карты
+while i <= MAPCOUNT:
+	for mapname in MAPLIST: 				# Поочередно выбираем карту
+		splitter = mapname.split(' ') 		# Разделяем название карты по пробелам
+		MAP_ID.append(splitter[0])  		# добавляем первое значение в список
+	i += 1 									# Переходим к следующей карте
 
 # Создание бэкапа
 backup = open('backup.py', 'w') 			# Создание .txt бэкап файла
