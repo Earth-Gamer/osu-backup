@@ -1,7 +1,20 @@
 import os
-
+import sys
+	
 SONGS_PATH = os.getenv('LOCALAPPDATA') + '/osu!/Songs'
-MAP_FOLDERS_LIST = os.listdir(SONGS_PATH)
+
+if not os.path.exists(SONGS_PATH):
+	try:
+		FILE = open('songs_path.txt', 'r')
+		SONGS_PATH = FILE.read()
+	except:
+		correct_path = open('songs_path.txt', 'w')
+		correct_path.close()
+		print('[ERROR]: Path %LOCALAPPDATA%/osu!/Songs does not exist. Put correct path into songs_path.txt and try again.')
+		print('Example: C:/Users/username/AppData/local/osu!/Songs .')
+		sys.exit()
+
+MAP_FOLDERS_LIST = os.listdir(str(SONGS_PATH))
 
 BACKUP = open('backup.py', 'w')
 BACKUP.write('MAP_FOLDERS_LIST = ' + str(MAP_FOLDERS_LIST))
