@@ -1,8 +1,9 @@
 import requests
-import backup 	# backup.py
+import ast
 import os
 
-MAP_FOLDERS_LIST = backup.MAP_FOLDERS_LIST
+MAP_FOLDERS_LIST = open('backup.txt', 'r').read()
+MAP_FOLDERS_LIST = ast.literal_eval(MAP_FOLDERS_LIST)
 MAPCOUNT = len(MAP_FOLDERS_LIST)
 MAP_ID = []
 i = 0 

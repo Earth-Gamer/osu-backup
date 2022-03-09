@@ -16,6 +16,6 @@ if not os.path.exists(SONGS_PATH):
 
 MAP_FOLDERS_LIST = os.listdir(str(SONGS_PATH))
 
-BACKUP = open('backup.py', 'w')
-BACKUP.write('MAP_FOLDERS_LIST = ' + str(MAP_FOLDERS_LIST))
+BACKUP = open('backup.txt', 'w')
+BACKUP.write(str(MAP_FOLDERS_LIST))
 BACKUP.close()
