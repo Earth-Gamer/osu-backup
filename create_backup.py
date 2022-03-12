@@ -1,6 +1,8 @@
 import os
 import sys
-	
+
+print('Creating bacup')
+
 SONGS_PATH = os.getenv('LOCALAPPDATA') + '/osu!/Songs'
 
 if not os.path.exists(SONGS_PATH):
@@ -19,3 +21,6 @@ MAP_FOLDERS_LIST = os.listdir(str(SONGS_PATH))
 BACKUP = open('backup.txt', 'w')
 BACKUP.write(str(MAP_FOLDERS_LIST))
 BACKUP.close()
+
+print('Backup created')
+input('Press [ENTER] to exit.')
