@@ -20,6 +20,7 @@ for mapname in MAP_FOLDERS_LIST:
 
 MAP_ID_COUNT = len(MAP_ID)
 
+print('Downloading beatmaps...')
 for id in MAP_ID:
 	MapLink = f'https://beatconnect.io/b/{id}'
 	r = requests.get(MapLink)
@@ -27,7 +28,8 @@ for id in MAP_ID:
 	with open(os.path.join(DOWNLOADS_PATH, f'{MAP_FOLDERS_LIST[i]}.osz'), 'wb') as f:
 		f.write(r.content)
 		f.close()
+		print('[FILE]' + MAP_FOLDERS_LIST[i] + ' Saved at ' + DOWNLOADS_PATH)
 	i += 1
 
-print('Maps loading complete.')
+print('All beatmap downloaded')
 input('Press [ENTER] to exit.')
