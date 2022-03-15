@@ -1,7 +1,7 @@
 import os
 import sys
 
-print('Creating bacup')
+print('Creating backup...')
 
 SONGS_PATH = os.getenv('LOCALAPPDATA') + '/osu!/Songs'
 
