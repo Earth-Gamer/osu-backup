@@ -2,6 +2,7 @@ import requests
 import ast
 import sys
 import os
+import time
 
 def Create_backup():
 	print('Creating backup...')
@@ -47,9 +48,7 @@ def Read_backup():
 	print('Extracting maps information...')
 	for mapname in MAP_FOLDERS_LIST:
 		splitter = mapname.split(' ')
-		MAP_ID.append(splitter[0])	
-
-	MAP_ID_COUNT = len(MAP_ID)
+		MAP_ID.append(splitter[0])
 
 	print('Downloading beatmaps...')
 	for id in MAP_ID:
@@ -59,26 +58,93 @@ def Read_backup():
 		with open(os.path.join(DOWNLOADS_PATH, f'{MAP_FOLDERS_LIST[i]}.osz'), 'wb') as f:
 			f.write(r.content)
 			f.close()
-			print('[FILE] ' + MAP_FOLDERS_LIST[i] + ' Saved at ' + DOWNLOADS_PATH)
+			print('[FILE] ' + MAP_FOLDERS_LIST[i] + ' dowloaded.')
 		i += 1
+		
 	print()
 	print('All beatmap downloaded')
 	input('Press [ENTER] to exit.')
 
-print('''
-	Choose an option:
-	1. Create backup.
-	2. Download beatmaps from backup.
-	0. EXIT\n
-	''')
-print('Type number (1-2)\n')
+class Edit_Backup():
+	def __init__(self):
+		Edit_Backup.Backup_File_Check(self)
+		Edit_Backup.Edit_Menu(self)
 
-choice = input()
-choice = int(choice)
+	def Edit_Menu(self):
+		print('''
+		Choose an option:
+		1. Add new beatmaps to backup.
+		2. Delete beatmaps from backup.
+		3. Return to Main menu.
+		---------------------------------
+		0. EXIT\n
+		''')
+		print('Type number (0-2)\n')
 
-if choice == 0:
-	sys.exit()
-elif choice == 1:
-	choice = Create_backup()
-elif choice == 2:
-	choice = Read_backup()
+		choice = input()
+		choice = int(choice)
+
+		if choice == 0:
+			sys.exit()
+		elif choice == 1:
+			action = Add_New_Beatmaps()
+		elif choice == 2:
+			action = Delete_Beatmaps()
+		elif choice == 3:
+			action = Main()
+
+	def Backup_File_Check(self): # прверяет есть ли бэкап файл в той же директории что и программа
+		if not os.path.isfile('backup.txt'):
+			try:
+				backup = open('temp.txt', 'r')
+			except:
+				print('Failed to find the backup file. Place the backup file in the same folder as the program, and close it, or enter the backup path here.\nTo close the program press [ENTER].')
+				input_data = input()
+				if input_data == '':
+					sys.exit()
+				else:
+					tempfile = open('temp.txt', 'w')
+					tempfile.write(str(input_data))
+					tempfile.close()
+					print()
+					time.sleep(2)
+					print('Program will be closed.')
+					time.sleep(2)
+					sys.exit()
+		else:
+			backup = open('backup.txt', 'r')
+
+	def Add_Beatmaps(): 
+		pass
+
+	def Delete_Beatmaps():
+		pass
+
+	# def Search_Beatmaps():
+	# 	pass
+
+def Main(): #
+	print('''
+		Choose an option:
+		1. Create backup.
+		2. Download beatmaps from backup.
+		3. Edit existing backup.
+		---------------------------------
+		0. EXIT\n
+		''')
+	print('Type number (0-2)\n')
+
+	choice = input()
+	choice = int(choice)
+
+	if choice == 0:
+		sys.exit()
+	elif choice == 1:
+		action = Create_backup()
+	elif choice == 2:
+		action = Read_backup()
+	elif choice == 3:
+		action = Edit_Backup()
+
+if __name__ == "__main__":
+	Main()
