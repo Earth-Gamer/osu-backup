@@ -21,9 +21,15 @@ def Create_backup():
 			sys.exit()
 
 	MAP_FOLDERS_LIST = os.listdir(str(SONGS_PATH))
+	MAP_ID = []
+	
+	print('Extracting maps information...')
+	for mapname in MAP_FOLDERS_LIST:
+		splitter = mapname.split(' ')
+		MAP_ID.append(splitter[0])
 
 	BACKUP = open('backup.txt', 'w')
-	BACKUP.write(str(MAP_FOLDERS_LIST))
+	BACKUP.write(str(MAP_ID))
 	BACKUP.close()
 
 	print('Backup created')
@@ -36,7 +42,6 @@ def Read_backup():
 		print('backup.txt file not found.')
 
 	MAP_FOLDERS_LIST = ast.literal_eval(MAP_FOLDERS_LIST)
-	MAP_ID = []
 	i = 0
 
 	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
@@ -44,11 +49,6 @@ def Read_backup():
 	if not os.path.exists(DOWNLOADS_PATH):
 		print('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
-
-	print('Extracting maps information...')
-	for mapname in MAP_FOLDERS_LIST:
-		splitter = mapname.split(' ')
-		MAP_ID.append(splitter[0])
 
 	print('Downloading beatmaps...')
 	for id in MAP_ID:
