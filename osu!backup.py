@@ -4,6 +4,25 @@ import sys
 import os
 import time
 
+def Backup_File_Check():
+	if not os.path.isfile('backup.txt'):
+		try:
+			backup = open('temp.txt', 'r')
+		except FileNotFoundError:
+			print('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
+			input_data = input()
+			if input_data == '':
+				sys.exit()
+			else:
+				tempfile = open('temp.txt', 'w')
+				tempfile.write(str(input_data))
+				tempfile.close()
+				print()
+				time.sleep(2)
+				print('Program will be closed.')
+				time.sleep(2)
+				sys.exit()
+
 def Create_backup():
 	print('Creating backup...')
 
@@ -24,12 +43,15 @@ def Create_backup():
 	MAP_ID = []
 	
 	print('Extracting maps information...')
-	for mapname in MAP_FOLDERS_LIST:
-		splitter = mapname.split(' ')
+	for beatmaps in MAP_FOLDERS_LIST:
+		splitter = beatmaps.split(' ', 1)
 		MAP_ID.append(splitter[0])
+		MAPNAME.append(splitter[-1])
+
+	result = dict(zip(MAP_ID, MAPNAME))
 
 	BACKUP = open('backup.txt', 'w')
-	BACKUP.write(str(MAP_ID))
+	BACKUP.write(str(result))
 	BACKUP.close()
 
 	print('Backup created')
@@ -37,29 +59,29 @@ def Create_backup():
 
 def Read_backup():
 	try:
-		MAP_FOLDERS_LIST = open('backup.txt', 'r').read()
+		backup = open('backup.txt', 'r').read()
 	except:
-		print('backup.txt file not found.')
+		backup_path = open('temp.txt', 'r').read()
+		backup = open(backup_path + '/backup.txt', 'r').read()
 
-	MAP_FOLDERS_LIST = ast.literal_eval(MAP_FOLDERS_LIST)
-	i = 0
-
+	MAP_ID = ast.literal_eval(backup)
 	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
+	counter = 0
 
 	if not os.path.exists(DOWNLOADS_PATH):
 		print('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
 
-	print('Downloading beatmaps...')
+	print('Downloading beatmaps...') 
 	for id in MAP_ID:
 		MapLink = f'https://beatconnect.io/b/{id}'
 		r = requests.get(MapLink)
-		print('[DOWNLOAD] ' + MAP_FOLDERS_LIST[i])
-		with open(os.path.join(DOWNLOADS_PATH, f'{MAP_FOLDERS_LIST[i]}.osz'), 'wb') as f:
+		print('[DOWNLOAD] ' + MAP_ID[counter])
+		with open(os.path.join(DOWNLOADS_PATH, f'{MAP_ID[counter]}.osz'), 'wb') as f:
 			f.write(r.content)
 			f.close()
-			print('[FILE] ' + MAP_FOLDERS_LIST[i] + ' dowloaded.')
-		i += 1
+			print('[FILE] dowloaded.')
+		counter += 1
 		
 	print()
 	print('All beatmap downloaded')
@@ -67,7 +89,6 @@ def Read_backup():
 
 class Edit_Backup():
 	def __init__(self):
-		Edit_Backup.Backup_File_Check(self)
 		Edit_Backup.Edit_Menu(self)
 
 	def Edit_Menu(self):
@@ -92,27 +113,6 @@ class Edit_Backup():
 			action = Delete_Beatmaps()
 		elif choice == 3:
 			action = Main()
-
-	def Backup_File_Check(self): # прверяет есть ли бэкап файл в той же директории что и программа
-		if not os.path.isfile('backup.txt'):
-			try:
-				backup = open('temp.txt', 'r')
-			except:
-				print('Failed to find the backup file. Place the backup file in the same folder as the program, and close it, or enter the backup path here.\nTo close the program press [ENTER].')
-				input_data = input()
-				if input_data == '':
-					sys.exit()
-				else:
-					tempfile = open('temp.txt', 'w')
-					tempfile.write(str(input_data))
-					tempfile.close()
-					print()
-					time.sleep(2)
-					print('Program will be closed.')
-					time.sleep(2)
-					sys.exit()
-		else:
-			backup = open('backup.txt', 'r')
 
 	def Add_Beatmaps(): 
 		pass
@@ -140,11 +140,13 @@ def Main(): #
 	if choice == 0:
 		sys.exit()
 	elif choice == 1:
-		action = Create_backup()
+		Create_backup()
 	elif choice == 2:
-		action = Read_backup()
+		Backup_File_Check()
+		Read_backup()
 	elif choice == 3:
-		action = Edit_Backup()
+		Backup_File_Check()
+		Edit_Backup()
 
 if __name__ == "__main__":
 	Main()
