@@ -41,6 +41,8 @@ def Create_backup():
 
 	MAP_FOLDERS_LIST = os.listdir(str(SONGS_PATH))
 	MAP_ID = []
+	MAPNAME = []
+	beatmaps_dict = {}
 	
 	print('Extracting maps information...')
 	for beatmaps in MAP_FOLDERS_LIST:
