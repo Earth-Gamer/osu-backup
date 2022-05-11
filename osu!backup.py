@@ -1,8 +1,9 @@
 import requests
+import time
 import ast
 import sys
 import os
-import time
+import re
 
 def Backup_File_Check():
 	if not os.path.isfile('backup.txt'):
@@ -44,11 +45,17 @@ def Create_backup():
 	MAPNAME = []
 	beatmaps_dict = {}
 	
+	forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
+
 	print('Extracting maps information...')
 	for beatmaps in MAP_FOLDERS_LIST:
-		splitter = beatmaps.split(' ', 1)
-		MAP_ID.append(splitter[0])
-		MAPNAME.append(splitter[-1])
+		result = re.match(forbidden_chars, beatmaps)
+		if result:
+			continue
+		else:
+			splitter = beatmaps.split(' ', 1)
+			MAP_ID.append(splitter[0])
+			MAPNAME.append(splitter[-1])
 
 	result = dict(zip(MAP_ID, MAPNAME))
 
@@ -66,24 +73,22 @@ def Read_backup():
 		backup_path = open('temp.txt', 'r').read()
 		backup = open(backup_path + '/backup.txt', 'r').read()
 
-	MAP_ID = ast.literal_eval(backup)
+	backup = ast.literal_eval(backup)
 	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
-	counter = 0
 
 	if not os.path.exists(DOWNLOADS_PATH):
 		print('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
 
 	print('Downloading beatmaps...') 
-	for id in MAP_ID:
+	for id in backup:
+		print('[DOWNLOAD] ' + backup[id])
 		MapLink = f'https://beatconnect.io/b/{id}'
 		r = requests.get(MapLink)
-		print('[DOWNLOAD] ' + MAP_ID[counter])
-		with open(os.path.join(DOWNLOADS_PATH, f'{MAP_ID[counter]}.osz'), 'wb') as f:
+		with open(os.path.join(DOWNLOADS_PATH, f'{backup[id]}.osz'), 'wb') as f:
 			f.write(r.content)
 			f.close()
 			print('[FILE] dowloaded.')
-		counter += 1
 		
 	print()
 	print('All beatmap downloaded')
