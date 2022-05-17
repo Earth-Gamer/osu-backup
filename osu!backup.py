@@ -1,3 +1,4 @@
+import configparser
 import time
 import ast
 import sys
@@ -45,6 +46,7 @@ def Create_backup():
 	MAP_ID = []
 	MAPNAME = []
 	beatmaps_dict = {}
+
 	forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
 	print('Extracting maps information...')
@@ -81,7 +83,7 @@ def Read_backup():
 		print('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
 
-	print('Downloading beatmaps...') 
+	print('Downloading beatmaps...')
 	for id in backup:
 		print('[DOWNLOAD] ' + backup[id])
 		MapLink = f'https://beatconnect.io/b/{id}'
@@ -90,7 +92,7 @@ def Read_backup():
 			f.write(r.content)
 			f.close()
 			print('[FILE] dowloaded.')
-		
+
 	print()
 	print('All beatmap downloaded')
 	input('Press [ENTER] to exit.')
@@ -122,7 +124,7 @@ class Edit_Backup():
 		elif choice == 3:
 			Main()
 
-	def Add_Beatmaps(): 
+	def Add_Beatmaps():
 		pass
 
 	def Delete_Beatmaps():
@@ -130,6 +132,30 @@ class Edit_Backup():
 
 	def Search_Beatmaps():
 		pass
+	
+class Config_Manager():
+	def Load_Config():
+		config = configparser.ConfigParser()
+		try:
+			if not configparser.MissingSectionHeaderError:
+				config.read('config.ini')
+			else: #Delete and recreate config file
+				os.remove('config.ini')
+				Config_Manager.Create_Config()
+		except FileNotFoundError:
+			print('config file not found')
+			Config_Manager.Create_Config()
+			
+			
+	def Create_Config():
+		# Default config
+		config = configparser.ConfigParser()
+		config.add_section('Settings')
+		config.set('Settings', 'songs_path', 'default')
+		config.set('Settings', 'backup_path', 'default')
+		
+		with open('config.ini', 'w') as config_file:
+			config.write(config_file)
 
 def Main(): #
 	print('''
