@@ -1,9 +1,10 @@
-import requests
 import time
 import ast
 import sys
 import os
 import re
+
+import requests
 
 def Backup_File_Check():
 	if not os.path.isfile('backup.txt'):
@@ -33,7 +34,7 @@ def Create_backup():
 		try:
 			FILE = open('songs_path.txt', 'r')
 			SONGS_PATH = FILE.read()
-		except:
+		except FileNotFoundError:
 			correct_path = open('songs_path.txt', 'w')
 			correct_path.close()
 			print('[ERROR]: Path %LOCALAPPDATA%/osu!/Songs does not exist. Put correct path into songs_path.txt and try again.')
@@ -44,7 +45,6 @@ def Create_backup():
 	MAP_ID = []
 	MAPNAME = []
 	beatmaps_dict = {}
-	
 	forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
 	print('Extracting maps information...')
@@ -56,14 +56,15 @@ def Create_backup():
 			splitter = beatmaps.split(' ', 1)
 			MAP_ID.append(splitter[0])
 			MAPNAME.append(splitter[-1])
-
 	result = dict(zip(MAP_ID, MAPNAME))
 
 	BACKUP = open('backup.txt', 'w')
 	BACKUP.write(str(result))
 	BACKUP.close()
 
+	time.sleep(2)
 	print('Backup created')
+	time.sleep(1)
 	input('Press [ENTER] to exit.')
 
 def Read_backup():
@@ -115,11 +116,11 @@ class Edit_Backup():
 		if choice == 0:
 			sys.exit()
 		elif choice == 1:
-			action = Add_New_Beatmaps()
+			Add_New_Beatmaps()
 		elif choice == 2:
-			action = Delete_Beatmaps()
+			Delete_Beatmaps()
 		elif choice == 3:
-			action = Main()
+			Main()
 
 	def Add_Beatmaps(): 
 		pass
@@ -127,8 +128,8 @@ class Edit_Backup():
 	def Delete_Beatmaps():
 		pass
 
-	# def Search_Beatmaps():
-	# 	pass
+	def Search_Beatmaps():
+		pass
 
 def Main(): #
 	print('''
