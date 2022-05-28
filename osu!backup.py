@@ -8,27 +8,24 @@ import re
 import requests
 # from loguru import logger
 
-
-# delete or not delete ?
-
-# def Backup_File_Check():
-# 	if not os.path.isfile('backup.txt'):
-# 		try:
-# 			backup = open('temp.txt', 'r')
-# 		except FileNotFoundError:
-# 			print('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-# 			input_data = input()
-# 			if input_data == '':
-# 				sys.exit()
-# 			else:
-# 				tempfile = open('temp.txt', 'w')
-# 				tempfile.write(str(input_data))
-# 				tempfile.close()
-# 				print()
-# 				time.sleep(2)
-# 				print('Program will be closed.')
-# 				time.sleep(2)
-# 				sys.exit()
+def Backup_File_Check():
+	if not os.path.isfile('backup.txt'):
+		try:
+			backup = open('temp.txt', 'r')
+		except FileNotFoundError:
+			print('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
+			input_data = input()
+			if input_data == '':
+				sys.exit()
+			else:
+				tempfile = open('temp.txt', 'w')
+				tempfile.write(str(input_data))
+				tempfile.close()
+				print()
+				time.sleep(2)
+				print('Program will be closed.')
+				time.sleep(2)
+				sys.exit()
 
 def Create_backup():
 	print('Creating backup...')
@@ -80,13 +77,11 @@ def Create_backup():
 	input('Press [ENTER] to exit.')
 
 def Read_backup():
-
-	# IMPORTANT: recreate with configparser
-	# try:
-	# 	backup = open('backup.txt', 'r').read()
-	# except:
-	# 	backup_path = open('temp.txt', 'r').read()
-	# 	backup = open(backup_path + '/backup.txt', 'r').read()
+	try:
+		backup = open('backup.txt', 'r').read()
+	except:
+		backup_path = open('temp.txt', 'r').read()
+		backup = open(backup_path + '/backup.txt', 'r').read()
 
 	backup = ast.literal_eval(backup)
 	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
@@ -188,10 +183,10 @@ def Main(): #
 	elif choice == 1:
 		Create_backup()
 	elif choice == 2:
-		# Backup_File_Check()
+		Backup_File_Check()
 		Read_backup()
 	elif choice == 3:
-		# Backup_File_Check()
+		Backup_File_Check()
 		Edit_Backup()
 
 if __name__ == "__main__":
