@@ -11,10 +11,10 @@ import requests
 def Backup_File_Check():
 	config = configparser.ConfigParser()
 	config.read('config.ini')
-	if not os.path.isfile('backup.txt'):
+	if not os.path.isfile('backup.txt'): # current directory
 		backup_path = config.get('Settings', 'backup_path')
 		print(backup_path)
-		if not os.path.isfile(f'{backup_path}/backup.txt'):
+		if not os.path.isfile(f'{backup_path}/backup.txt'): # directory from config.ini
 			print('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
 			input_data = input()
 			if not input_data == '': # input_data == nothing (user press ENTER without anything)
@@ -77,15 +77,12 @@ def Create_backup():
 def Read_backup():
 	config = configparser.ConfigParser()
 	config.read('config.ini')
-	backup_path = config.get('Settings', 'songs_path')
-	
+	backup_path = config.get('Settings', 'backup_path')
+
 	if backup_path == 'default':
 		backup_path = os.getcwd()
-		backup = open(f'{backup_path}/backup.txt', 'r').read()
-	else:
-		backup_path = os.getenv(backup_path)
-		backup = open(f'{backup_path}/backup.txt', 'r').read()
 
+	backup = open(f'{backup_path}/backup.txt', 'r').read()
 	backup = ast.literal_eval(backup)
 	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
 
@@ -149,13 +146,15 @@ class Config_Manager():
 		try:
 			if not os.path.isfile('config.ini'):
 				Config_Manager.Create_Config()
-			if configparser.MissingSectionHeaderError: #Delete and recreate config file
+			try:
+				config.read('config.ini')
+				config.get('Settings', 'songs_path')
+			except:
 				os.remove('config.ini')
 				Config_Manager.Create_Config()
 		except FileNotFoundError:
 			print('config file not found')
 			Config_Manager.Create_Config()
-			
 			
 	def Create_Config():
 		# Default config
