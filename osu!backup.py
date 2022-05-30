@@ -1,4 +1,5 @@
 import configparser
+import json
 import time
 import ast
 import sys
@@ -63,7 +64,7 @@ def Create_backup():
 			splitter = beatmaps.split(' ', 1)
 			MAP_ID.append(splitter[0])
 			MAPNAME.append(splitter[-1])
-	result = dict(zip(MAP_ID, MAPNAME))
+	result = json.dumps(dict(zip(MAP_ID, MAPNAME)), sort_keys = False, indent=4)
 
 	BACKUP = open('backup.txt', 'w')
 	BACKUP.write(str(result))
