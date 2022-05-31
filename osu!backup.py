@@ -161,7 +161,7 @@ class Config_Manager():
 		# Default config
 		config = configparser.ConfigParser()
 		config.add_section('Settings')
-		config.set('Settings', 'songs_path', 'default')
+		config.set('Settings', 'songs_path', 'default') # %LOCALAPPDATA%/osu!/Songs
 		config.set('Settings', 'backup_path', 'default') #default -> current directory
 		
 		with open('config.ini', 'w') as config_file:
