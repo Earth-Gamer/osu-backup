@@ -7,7 +7,7 @@ import os
 import re
 
 import requests
-# from loguru import logger
+from loguru import logger
 
 def Backup_File_Check():
 	config = configparser.ConfigParser()
@@ -55,12 +55,11 @@ def Create_backup():
 
 	forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
+	time.sleep(1)
 	print('Extracting maps information...')
 	for beatmaps in MAP_FOLDERS_LIST:
 		result = re.match(forbidden_chars, beatmaps)
-		if result:
-			continue
-		else:
+		if not result:
 			splitter = beatmaps.split(' ', 1)
 			MAP_ID.append(splitter[0])
 			MAPNAME.append(splitter[-1])
@@ -167,7 +166,7 @@ class Config_Manager():
 		with open('config.ini', 'w') as config_file:
 			config.write(config_file)
 
-def Main(): #
+def Main():
 	print('''
 		Choose an option:
 		1. Create backup.
