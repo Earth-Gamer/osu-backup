@@ -58,9 +58,7 @@ def Create_backup():
 	print('Extracting maps information...')
 	for beatmaps in MAP_FOLDERS_LIST:
 		result = re.match(forbidden_chars, beatmaps)
-		if result:
-			continue
-		else:
+		if not result:
 			splitter = beatmaps.split(' ', 1)
 			MAP_ID.append(splitter[0])
 			MAPNAME.append(splitter[-1])
@@ -95,7 +93,10 @@ def Read_backup():
 	for id in backup:
 		print('[DOWNLOAD] ' + backup[id])
 		MapLink = f'https://beatconnect.io/b/{id}'
-		r = requests.get(MapLink)
+		try:
+			r = requests.get(MapLink)
+		except:
+			print("Connection error(test)")
 		with open(os.path.join(DOWNLOADS_PATH, f'{backup[id]}.osz'), 'wb') as f:
 			f.write(r.content)
 			f.close()
