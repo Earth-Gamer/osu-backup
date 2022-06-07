@@ -9,6 +9,12 @@ import re
 import requests
 from loguru import logger
 
+logger.add(
+	"{time}.log", 
+	format="{time:YYYY-MM-DD at HH:mm:ss}  [{level}]  <{message}>",
+	level="TRACE"
+	) 
+
 def Backup_File_Check():
 	config = configparser.ConfigParser()
 	config.read('config.ini')
@@ -27,7 +33,7 @@ def Backup_File_Check():
 
 
 def Create_backup():
-	print('Creating backup...')
+	logger.info('Creating backup...')
 	config = configparser.ConfigParser()
 	config.read('config.ini')
 	SONGS_PATH = config.get('Settings', 'songs_path')
@@ -38,8 +44,8 @@ def Create_backup():
 		SONGS_PATH = os.getenv(str(config))
 
 	if not os.path.exists(SONGS_PATH):
-		print(f'[ERROR]: Path {SONGS_PATH} does not exist. Type correct path and try again.')
-		print('Example: C:/Users/username/AppData/local/osu!/Songs.')
+		logger.error(f'[ERROR]: Path {SONGS_PATH} does not exist. Type correct path and try again.')
+		logger.info('Example: C:/Users/username/AppData/local/osu!/Songs.')
 
 		input_data = input()
 		SONGS_PATH = str(input_data)
@@ -52,11 +58,10 @@ def Create_backup():
 	MAP_ID = []
 	MAPNAME = []
 	beatmaps_dict = {}
-
 	forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
 	time.sleep(1)
-	print('Extracting maps information...')
+	logger.info('Extracting maps information...')
 	for beatmaps in MAP_FOLDERS_LIST:
 		result = re.match(forbidden_chars, beatmaps)
 		if not result:
@@ -70,7 +75,7 @@ def Create_backup():
 	BACKUP.close()
 
 	time.sleep(2)
-	print('Backup created')
+	logger.info('Backup created')
 	time.sleep(1)
 	input('Press [ENTER] to exit.')
 
@@ -81,30 +86,31 @@ def Read_backup():
 
 	if backup_path == 'default':
 		backup_path = os.getcwd()
+	# else: backup_path = string from config file
 
 	backup = open(f'{backup_path}/backup.txt', 'r').read()
 	backup = ast.literal_eval(backup)
 	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
 
 	if not os.path.exists(DOWNLOADS_PATH):
-		print('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
+		logger.info('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
 
-	print('Downloading beatmaps...')
+	logger.info('Downloading beatmaps...')
 	for id in backup:
-		print('[DOWNLOAD] ' + backup[id])
+		logger.info('[DOWNLOAD] ' + backup[id])
 		MapLink = f'https://beatconnect.io/b/{id}'
 		try:
 			r = requests.get(MapLink)
 		except:
-			print("Connection error(test)")
+			logger.error("Something went wrong when the program tried to connect to the server. Please try again after closing the program.")
+			sys.exit(2)
 		with open(os.path.join(DOWNLOADS_PATH, f'{backup[id]}.osz'), 'wb') as f:
 			f.write(r.content)
 			f.close()
-			print('[FILE] dowloaded.')
+			logger.info('[FILE] dowloaded.')
 
-	print()
-	print('All beatmap downloaded')
+	logger.info('All beatmap downloaded')
 	input('Press [ENTER] to exit.')
 
 class Edit_Backup():
@@ -112,6 +118,7 @@ class Edit_Backup():
 		Edit_Backup.Edit_Menu(self)
 
 	def Edit_Menu(self):
+		logger.trace('Edit menu')
 		print('''
 		Choose an option:
 		1. Add new beatmaps to backup.
@@ -170,6 +177,7 @@ class Config_Manager():
 			config.write(config_file)
 
 def Main():
+	logger.trace('Main menu')
 	print('''
 		Choose an option:
 		1. Create backup.
