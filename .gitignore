@@ -5,3 +5,6 @@ temp.txt
 backup.txt
 config.ini
 test_folder
+Lib/site-packages
+Scripts
+pyvenv.cfg
