@@ -8,3 +8,4 @@ test_folder
 Lib/site-packages
 Scripts
 pyvenv.cfg
+backup_downloads

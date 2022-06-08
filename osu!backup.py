@@ -9,12 +9,6 @@ import re
 import requests
 from loguru import logger
 
-logger.add(
-	"{time}.log", 
-	format="{time:YYYY-MM-DD at HH:mm:ss}  [{level}]  <{message}>",
-	level="TRACE"
-	) 
-
 def Backup_File_Check():
 	config = configparser.ConfigParser()
 	config.read('config.ini')
@@ -79,7 +73,13 @@ def Create_backup():
 	time.sleep(1)
 	input('Press [ENTER] to exit.')
 
+
 def Read_backup():
+
+	misslist_id = []
+	misslist_title = []
+	download_url = 'https://beatconnect.io/b/'
+
 	config = configparser.ConfigParser()
 	config.read('config.ini')
 	backup_path = config.get('Settings', 'backup_path')
@@ -96,19 +96,37 @@ def Read_backup():
 		logger.info('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
 
-	url = config.read('Settings', 'download_source')
 	logger.info('Downloading beatmaps...')
 	for id in backup:
+		skip_errors = 0
+
+
 		logger.info('[DOWNLOAD] ' + backup[id])
-		MapLink = url + id
-		r = requests.get(MapLink)
+		r = requests.get(download_url + id)
+		logger.debug(r)
+
 		if r.status_code != requests.codes.ok:
-			logger.error('Connection failed')
-			sys.exit(2)
+			if r.status_code == 404:
+				logger.error(f'File {backup[id]} failed to download.')
+				misslist_id.append(id)
+				misslist_title.append(backup[id])
+			else:
+				logger.error('Connection Error: status_code = ' + str(r.status_code))
+				sys.exit(2)
+		else:
+			logger.info('[FILE] dowloaded.')
+
+
 		with open(os.path.join(DOWNLOADS_PATH, f'{backup[id]}.osz'), 'wb') as f:
 			f.write(r.content)
 			f.close()
-			logger.info('[FILE] dowloaded.')
+		time.sleep(15)
+
+	if misslist_id and misslist_title != None:
+		result = json.dumps(dict(zip(misslist_id, misslist_title)), sort_keys = False, indent=4)
+		with open('missing_beatmaps.txt', 'w') as f:
+			f.write(result)
+		logger.warning('Some beatmaps did not download. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
 
 	logger.info('All beatmap downloaded')
 	input('Press [ENTER] to exit.')
@@ -172,18 +190,22 @@ class Config_Manager():
 		template = {
 			'songs_path':'default', # default -> %LOCALAPPDATA%/osu!/Songs
 			'backup_path':'default', # default -> current directory
-			'download_source':'https://beatconnect.io/b/'
 		}
 
 		config = configparser.ConfigParser()
 		config.add_section('Settings')
 		config.set('Settings', 'songs_path', template['songs_path'])
 		config.set('Settings', 'backup_path', template['backup_path']) 
-		config.set('Settings', 'download_source', template['download_source'])
 		with open('config.ini', 'w') as config_file:
 			config.write(config_file)
 
 def Main():
+	logger.add(
+	"{time}.log", 
+	format="{time:YYYY-MM-DD at HH:mm:ss}  [{level}]  {message}",
+	level="TRACE"
+	)
+
 	logger.trace('Main menu')
 	print('''
 		Choose an option:
