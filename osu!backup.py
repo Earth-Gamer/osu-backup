@@ -96,14 +96,14 @@ def Read_backup():
 		logger.info('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
 		os.makedirs(DOWNLOADS_PATH)
 
+	url = config.read('Settings', 'download_source')
 	logger.info('Downloading beatmaps...')
 	for id in backup:
 		logger.info('[DOWNLOAD] ' + backup[id])
-		MapLink = f'https://beatconnect.io/b/{id}'
-		try:
-			r = requests.get(MapLink)
-		except:
-			logger.error("Something went wrong when the program tried to connect to the server. Please try again after closing the program.")
+		MapLink = url + id
+		r = requests.get(MapLink)
+		if r.status_code != requests.codes.ok:
+			logger.error('Connection failed')
 			sys.exit(2)
 		with open(os.path.join(DOWNLOADS_PATH, f'{backup[id]}.osz'), 'wb') as f:
 			f.write(r.content)
@@ -168,11 +168,18 @@ class Config_Manager():
 			
 	def Create_Config():
 		# Default config
+
+		template = {
+			'songs_path':'default', # default -> %LOCALAPPDATA%/osu!/Songs
+			'backup_path':'default', # default -> current directory
+			'download_source':'https://beatconnect.io/b/'
+		}
+
 		config = configparser.ConfigParser()
 		config.add_section('Settings')
-		config.set('Settings', 'songs_path', 'default') # %LOCALAPPDATA%/osu!/Songs
-		config.set('Settings', 'backup_path', 'default') #default -> current directory
-		
+		config.set('Settings', 'songs_path', template['songs_path'])
+		config.set('Settings', 'backup_path', template['backup_path']) 
+		config.set('Settings', 'download_source', template['download_source'])
 		with open('config.ini', 'w') as config_file:
 			config.write(config_file)
 
