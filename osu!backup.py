@@ -49,7 +49,7 @@ def Create_backup():
 			config.write(config_file)
 
 	MAP_FOLDERS_LIST = os.listdir(str(SONGS_PATH))
-	MAP_ID = []
+	MAP_id = []
 	MAPNAME = []
 	beatmaps_dict = {}
 	forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
@@ -60,9 +60,9 @@ def Create_backup():
 		result = re.match(forbidden_chars, beatmaps)
 		if not result:
 			splitter = beatmaps.split(' ', 1)
-			MAP_ID.append(splitter[0])
+			MAP_id.append(splitter[0])
 			MAPNAME.append(splitter[-1])
-	result = json.dumps(dict(zip(MAP_ID, MAPNAME)), sort_keys = False, indent=4)
+	result = json.dumps(dict(zip(MAP_id, MAPNAME)), sort_keys = False, indent=4)
 
 	BACKUP = open('backup.txt', 'w')
 	BACKUP.write(str(result))
@@ -74,62 +74,75 @@ def Create_backup():
 	input('Press [ENTER] to exit.')
 
 
-def Read_backup():
-
+class Read_backup():
+	global misslist_id
+	global misslist_title
 	misslist_id = []
 	misslist_title = []
-	download_url = 'https://beatconnect.io/b/'
+	backup = {}
 
-	config = configparser.ConfigParser()
-	config.read('config.ini')
-	backup_path = config.get('Settings', 'backup_path')
-
-	if backup_path == 'default':
-		backup_path = os.getcwd()
-	# else: backup_path = string from config file
-
-	backup = open(f'{backup_path}/backup.txt', 'r').read()
-	backup = ast.literal_eval(backup)
-	DOWNLOADS_PATH = os.getcwd() + '/backup_downloads'
-
-	if not os.path.exists(DOWNLOADS_PATH):
-		logger.info('Creating folder for beatmaps at ' + DOWNLOADS_PATH)
-		os.makedirs(DOWNLOADS_PATH)
-
-	logger.info('Downloading beatmaps...')
-	for id in backup:
-		skip_errors = 0
+	def __init__(self):
+		Read_backup.Backup_Parser()
+		Read_backup.Downloader()
+		Read_backup.Missed_Maps()
 
 
-		logger.info('[DOWNLOAD] ' + backup[id])
-		r = requests.get(download_url + id)
-		logger.debug(r)
+	def Backup_Parser():
+		config = configparser.ConfigParser()
+		config.read('config.ini')
+		backup_path = config.get('Settings', 'backup_path')
 
-		if r.status_code != requests.codes.ok:
-			if r.status_code == 404:
-				logger.error(f'File {backup[id]} failed to download.')
-				misslist_id.append(id)
-				misslist_title.append(backup[id])
-			else:
-				logger.error('Connection Error: status_code = ' + str(r.status_code))
-				sys.exit(2)
-		else:
-			logger.info('[FILE] dowloaded.')
+		if backup_path == 'default':
+			backup_path = os.getcwd()
+		# else: backup_path = string from config file
+		global backup
+		backup = open(f'{backup_path}/backup.txt', 'r').read()
+		backup = ast.literal_eval(backup)
+
+	def Downloader():
+		download_url = 'https://beatconnect.io/b/'
+		download_path = os.getcwd() + '/backup_downloads'
+		maps_amount = len(backup)
+
+		if not os.path.exists(download_path):
+			logger.info('Creating folder for beatmaps at ' + download_path)
+			os.makedirs(download_path)
+
+		logger.info('Downloading beatmaps...')
+		for id in backup:
+			logger.debug(backup)
+			logger.info('[DOWNLOAD] ' + backup[id])
+			try:
+				r = requests.get(download_url + id)
+				logger.debug(r)
+				with open(os.path.join(download_path, f'{id} {backup[id]}.osz'), 'wb') as f:
+					f.write(r.content)
+					logger.info("[FILE] dowloaded.")
+				time.sleep(15)
+			except:
+				if r.status_code == 404:
+					logger.error(f'File {backup[id]} failed to download.')
+					misslist_id.append(id)
+					misslist_title.append(backup[id])
+					logger.debug('id = ' + id)
+				elif r.status_code == 502:
+					logger.info("somthing soes wrong with connection, we will try again after 60 seconds.")
+					time.sleep(60)
+					logger.debug('id = ' + id)
+		logger.info('All beatmap downloaded')
+
+			
+
+	def Missed_Maps():	
 
 
-		with open(os.path.join(DOWNLOADS_PATH, f'{backup[id]}.osz'), 'wb') as f:
-			f.write(r.content)
-			f.close()
-		time.sleep(15)
+		if misslist_id and misslist_title != None:
+			result = json.dumps(dict(zip(misslist_id, misslist_title)), sort_keys = False, indent=4)
+			with open('missing_beatmaps.txt', 'w') as f:
+				f.write(result)
+			logger.warning('Some beatmaps did not download. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
 
-	if misslist_id and misslist_title != None:
-		result = json.dumps(dict(zip(misslist_id, misslist_title)), sort_keys = False, indent=4)
-		with open('missing_beatmaps.txt', 'w') as f:
-			f.write(result)
-		logger.warning('Some beatmaps did not download. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
 
-	logger.info('All beatmap downloaded')
-	input('Press [ENTER] to exit.')
 
 class Edit_Backup():
 	def __init__(self):
@@ -202,7 +215,7 @@ class Config_Manager():
 def Main():
 	logger.add(
 	"{time}.log", 
-	format="{time:YYYY-MM-DD at HH:mm:ss}  [{level}]  {message}",
+	format="{time:YYYY-MM-DD at HH:mm:ss} | {level}  <{message}>",
 	level="TRACE"
 	)
 
