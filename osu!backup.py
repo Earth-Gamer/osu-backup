@@ -9,6 +9,7 @@ import re
 import requests
 from loguru import logger
 
+@logger.catch
 def Backup_File_Check():
 	config = configparser.ConfigParser()
 	config.read('config.ini')
@@ -26,6 +27,7 @@ def Backup_File_Check():
 					config.write(config_file)
 
 
+@logger.catch
 def Create_backup():
 	logger.info('Creating backup...')
 	config = configparser.ConfigParser()
@@ -74,7 +76,8 @@ def Create_backup():
 	input('Press [ENTER] to exit.')
 
 
-class Read_backup():
+@logger.catch
+class Read_Backup():
 	global misslist_id
 	global misslist_title
 	misslist_id = []
@@ -82,12 +85,14 @@ class Read_backup():
 	backup = {}
 
 	def __init__(self):
-		Read_backup.Backup_Parser()
-		Read_backup.Downloader()
-		Read_backup.Missed_Maps()
+		Read_Backup.Backup_Parser(self)
+		Read_Backup.Downloader(self)
+		logger.info('All beatmaps downloaded')
+		logger.info('Press [ENTER] to exit.')
+		input()
 
 
-	def Backup_Parser():
+	def Backup_Parser(self):
 		config = configparser.ConfigParser()
 		config.read('config.ini')
 		backup_path = config.get('Settings', 'backup_path')
@@ -95,47 +100,59 @@ class Read_backup():
 		if backup_path == 'default':
 			backup_path = os.getcwd()
 		# else: backup_path = string from config file
+		
 		global backup
 		backup = open(f'{backup_path}/backup.txt', 'r').read()
 		backup = ast.literal_eval(backup)
 
-	def Downloader():
-		download_url = 'https://beatconnect.io/b/'
-		download_path = os.getcwd() + '/backup_downloads'
-		maps_amount = len(backup)
 
-		if not os.path.exists(download_path):
-			logger.info('Creating folder for beatmaps at ' + download_path)
-			os.makedirs(download_path)
+	def Downloader(self):
+		self.download_path = os.getcwd() + '/backup_downloads'
+
+		if not os.path.exists(self.download_path):
+			logger.info('Creating folder for beatmaps at ' + self.download_path)
+			os.makedirs(self.download_path)
 
 		logger.info('Downloading beatmaps...')
-		for id in backup:
-			logger.debug(backup)
-			logger.info('[DOWNLOAD] ' + backup[id])
-			try:
-				r = requests.get(download_url + id)
-				logger.debug(r)
-				with open(os.path.join(download_path, f'{id} {backup[id]}.osz'), 'wb') as f:
-					f.write(r.content)
-					logger.info("[FILE] dowloaded.")
-				time.sleep(15)
-			except:
-				if r.status_code == 404:
-					logger.error(f'File {backup[id]} failed to download.')
-					misslist_id.append(id)
-					misslist_title.append(backup[id])
-					logger.debug('id = ' + id)
-				elif r.status_code == 502:
-					logger.info("somthing soes wrong with connection, we will try again after 60 seconds.")
-					time.sleep(60)
-					logger.debug('id = ' + id)
-		logger.info('All beatmap downloaded')
+		for self.MapId in backup:
+			Read_Backup.Beatconnect_Parser(self)
+		Read_Backup.Missed_Maps()
 
+
+	def Beatconnect_Parser(self):
+		download_url = 'https://beatconnect.io/b/'
+
+		self.response = requests.get(download_url + self.MapId)
+		logger.info(f'[DOWNLOAD] {backup[self.MapId]}')
+		global status_code
+		status_code = self.response.status_code
+		if status_code != requests.codes.ok:
+			Read_Backup.Request_Errors(self)
+		Read_Backup.Write_Beatmap(self)
+
+
+	def Request_Errors(self):
+		if status_code == 404:
+			logger.error(f'File {backup[self.MapId]} failed to download.')
+			misslist_id.append(self.MapId)
+			misslist_title.append(backup[self.MapId])
+
+		elif status_code == 502:
+			logger.error("somthing went wrong with connection, we will try again after 60 seconds.")
+			time.sleep(60)
+			Read_Backup.Downloader(self)
+
+
+	def Write_Beatmap(self):
+		download_path = self.download_path
+
+		with open(os.path.join(download_path, f'{self.MapId} {backup[self.MapId]}.osz'), 'wb') as f:
+			f.write(self.response.content)
+		time.sleep(15)
+		logger.info("[FILE] dowloaded.")
 			
 
 	def Missed_Maps():	
-
-
 		if misslist_id and misslist_title != None:
 			result = json.dumps(dict(zip(misslist_id, misslist_title)), sort_keys = False, indent=4)
 			with open('missing_beatmaps.txt', 'w') as f:
@@ -143,7 +160,7 @@ class Read_backup():
 			logger.warning('Some beatmaps did not download. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
 
 
-
+@logger.catch
 class Edit_Backup():
 	def __init__(self):
 		Edit_Backup.Edit_Menu(self)
@@ -181,6 +198,8 @@ class Edit_Backup():
 	def Search_Beatmaps():
 		pass
 	
+
+@logger.catch
 class Config_Manager():
 	def Load_Config():
 		config = configparser.ConfigParser()
@@ -212,6 +231,8 @@ class Config_Manager():
 		with open('config.ini', 'w') as config_file:
 			config.write(config_file)
 
+
+@logger.catch
 def Main():
 	logger.add(
 	"{time}.log", 
@@ -239,7 +260,7 @@ def Main():
 		Create_backup()
 	elif choice == 2:
 		Backup_File_Check()
-		Read_backup()
+		Read_Backup()
 	elif choice == 3:
 		Backup_File_Check()
 		Edit_Backup()
