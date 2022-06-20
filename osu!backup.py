@@ -131,20 +131,27 @@ class Read_Backup:
 
 	def Beatconnect_Parser(self):
 		download_url = 'https://beatconnect.io/b/'
+		try:
+			self.response = requests.get(download_url + self.MapId)
+		except requests.Timeout:
+			misslist_id.append(self.MapId)
+			misslist_title.append(backup[self.MapId])
+			logger.exception('Connection Timeout. Reconnecting 2 minutes.')
+			time.sleep(120)
 
-		self.response = requests.get(download_url + self.MapId)
 		logger.info(f'[DOWNLOAD] {backup[self.MapId]}')
 		global status_code
 		status_code = self.response.status_code
 		if status_code != requests.codes.ok:
 			Read_Backup.Request_Errors(self)
-		Read_Backup.Write_Beatmap(self)
+		else:
+			Read_Backup.Write_Beatmap(self)
 		time.sleep(30)
 
 
 	def Request_Errors(self):
 		if status_code == 404:
-			logger.error(f'File {backup[id]} failed to download.')
+			logger.error(f'File <{backup[self.MapId]}> failed to download.')
 			misslist_id.append(self.MapId)
 			misslist_title.append(backup[self.MapId])
 
@@ -156,6 +163,7 @@ class Read_Backup:
 
 
 	def Write_Beatmap(self):
+		self.ErrorStatus = False
 		with open(os.path.join(download_path, f'{self.MapId} {backup[self.MapId]}.osz'), 'wb') as f:
 			f.write(self.response.content)
 		logger.info("[FILE] dowloaded.")
