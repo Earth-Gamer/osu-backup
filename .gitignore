@@ -3,3 +3,5 @@ Lib
 Test
 lazygit.exe
 pyvenv.cfg
+Logs
+config.ini
