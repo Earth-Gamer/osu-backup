@@ -1,7 +1,10 @@
-Scripts
-Lib
 Test
 lazygit.exe
-pyvenv.cfg
-Logs
+backup.txt
 config.ini
+test_folder
+Lib/site-packages
+Scripts
+pyvenv.cfg
+backup_downloads
+Logs
