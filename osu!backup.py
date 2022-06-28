@@ -177,45 +177,6 @@ class Read_Backup:
 			with open('missing_beatmaps.txt', 'w') as f:
 				f.write(result)
 			logger.warning('Some beatmaps did not download. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
-
-
-@logger.catch
-class Edit_Backup():
-	def __init__(self):
-		Edit_Backup.Edit_Menu(self)
-
-	def Edit_Menu(self):
-		logger.trace('Edit menu')
-		print('''
-		Choose an option:
-		1. Add new beatmaps to backup.
-		2. Delete beatmaps from backup.
-		3. Return to Main menu.
-		---------------------------------
-		0. EXIT\n
-		''')
-		print('Type number (0-2)\n')
-
-		choice = input()
-		choice = int(choice)
-
-		if choice == 0:
-			sys.exit()
-		elif choice == 1:
-			Add_New_Beatmaps()
-		elif choice == 2:
-			Delete_Beatmaps()
-		elif choice == 3:
-			Main()
-
-	def Add_Beatmaps():
-		pass
-
-	def Delete_Beatmaps():
-		pass
-
-	def Search_Beatmaps():
-		pass
 	
 
 @logger.catch
@@ -282,7 +243,6 @@ def Main():
 		Choose an option:
 		1. Create backup.
 		2. Download beatmaps from backup.
-		3. Edit existing backup.
 		---------------------------------
 		0. EXIT\n
 		''')
@@ -298,9 +258,6 @@ def Main():
 	elif choice == 2:
 		Backup_File_Check()
 		Read_Backup()
-	elif choice == 3:
-		Backup_File_Check()
-		Edit_Backup()
 
 if __name__ == "__main__":
 	Config_Manager()
