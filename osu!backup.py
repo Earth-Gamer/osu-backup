@@ -26,6 +26,8 @@ def Backup_File_Check():
 				with open('config.ini', 'w') as config_file:
 					config.write(config_file)
 				sys.exit()
+			else:
+				sys.exit()
 
 
 @logger.catch
@@ -123,11 +125,11 @@ class Read_Backup:
 		self.FilteredBeatmaps = {}
 		for Beatmaps in backup:
 			downloaded_file_path = f'{download_path}/{Beatmaps} {backup[Beatmaps]}.osz'
-			Local_songs_path = f'{self.songs_path}/{Beatmaps} {backup[Beatmaps]}.osz'
-			if not os.path.isfile(Local_songs_path):
+			Local_songs_path = f'{self.songs_path}/{Beatmaps} {backup[Beatmaps]}'
+			if not os.path.isdir(Local_songs_path):
 				if not os.path.isfile(downloaded_file_path): 
 					self.FilteredBeatmaps[Beatmaps]=backup[Beatmaps]
-		
+
 
 	def Beatconnect_Parser(self):
 		download_url = 'https://beatconnect.io/b/'
@@ -212,7 +214,6 @@ class Config_Manager:
 		if self.backup_path == 'default':
 			self.backup_path = os.getcwd()
 
-			
 
 	def Create_Config():
 		# Default config
