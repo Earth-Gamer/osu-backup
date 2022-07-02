@@ -9,3 +9,4 @@ pyvenv.cfg
 backup_downloads
 Logs
 dist
+osu!backup.spec

@@ -60,7 +60,6 @@ class Create_backup:
 		MAP_FOLDERS_LIST = os.listdir(str(self.songs_path))
 		MAP_id = []
 		MAPNAME = []
-		beatmaps_dict = {}
 		forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
 		time.sleep(1)
@@ -165,7 +164,6 @@ class Read_Backup:
 
 
 	def Write_Beatmap(self):
-		self.ErrorStatus = False
 		with open(os.path.join(download_path, f'{self.MapId} {backup[self.MapId]}.osz'), 'wb') as f:
 			f.write(self.response.content)
 		logger.info("[FILE] dowloaded.")
@@ -233,9 +231,13 @@ class Config_Manager:
 @logger.catch
 def Main():
 	logger.add(
-	"{time}.log", 
+	sys.stderr,
 	format="{time:YYYY-MM-DD at HH:mm:ss} | {level}  <{message}>",
 	level="TRACE"
+	)
+	logger.add(
+	"{time}.log",
+	level="TRACE" 
 	)
 
 	logger.trace('Main menu')
