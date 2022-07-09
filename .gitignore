@@ -10,3 +10,5 @@ backup_downloads
 Logs
 dist
 osu!backup.spec
+
+build/osu!backup

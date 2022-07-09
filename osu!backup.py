@@ -233,7 +233,7 @@ def Main():
 	logger.add(
 	sys.stderr,
 	format="{time:YYYY-MM-DD at HH:mm:ss} | {level}  <{message}>",
-	level="TRACE"
+	level="WARNING"
 	)
 	logger.add(
 	"{time}.log",
