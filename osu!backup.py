@@ -137,7 +137,7 @@ class Read_Backup:
 		except requests.Timeout:
 			misslist_id.append(self.MapId)
 			misslist_title.append(backup[self.MapId])
-			logger.exception('Connection Timeout. Reconnecting 2 minutes.')
+			logger.exception('Connection Timeout. Reconnection in 2 minutes.')
 			time.sleep(120)
 
 		logger.info(f'[DOWNLOAD] {backup[self.MapId]}')
@@ -174,7 +174,7 @@ class Read_Backup:
 			result = json.dumps(dict(zip(misslist_id, misslist_title)), sort_keys = False, indent=4)
 			with open('missing_beatmaps.txt', 'w') as f:
 				f.write(result)
-			logger.warning('Some beatmaps did not download. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
+			logger.warning('Some beatmaps are not downloaded. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
 	
 
 @logger.catch
@@ -236,7 +236,7 @@ def Main():
 	level="WARNING"
 	)
 	logger.add(
-	"{time}.log",
+	"./logs/runtime.log",
 	level="TRACE" 
 	)
 
@@ -254,6 +254,7 @@ def Main():
 	choice = int(choice)
 
 	if choice == 0:
+		logger.trace('Exot from programm')
 		sys.exit()
 	elif choice == 1:
 		Create_backup()
