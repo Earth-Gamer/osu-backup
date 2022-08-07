@@ -12,3 +12,4 @@ dist
 osu!backup.spec
 
 build/osu!backup
+include/site/python3.10/greenlet
