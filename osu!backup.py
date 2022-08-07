@@ -230,16 +230,6 @@ class Config_Manager:
 
 @logger.catch
 def Main():
-	logger.add(
-	sys.stderr,
-	format="{time:YYYY-MM-DD at HH:mm:ss} | {level}  <{message}>",
-	level="WARNING"
-	)
-	logger.add(
-	"./logs/runtime.log",
-	level="TRACE" 
-	)
-
 	logger.trace('Main menu')
 	print('''
 		Choose an option:
