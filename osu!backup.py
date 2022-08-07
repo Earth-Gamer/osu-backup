@@ -9,6 +9,30 @@ import re
 import requests
 from loguru import logger
 
+logs_time_format = "{time:YYYY-MM-DD at HH:mm:ss}"
+logs_level_format = "<level>{level}</level>"
+logs_message_format = "<level>{message}</level>"
+logs_file_path = './logs/'
+
+config = {
+	"handlers": [
+		{
+			"sink": sys.stderr,
+			"format": f"{logs_time_format} | {logs_level_format	} | {logs_message_format}"
+		},
+		{
+			"sink": logs_file_path + "{time}.log",
+		},
+	]
+}
+logger.configure(**config)
+
+
+beatconnect_url = 'https://beatconnect.io/b/'
+chimu_url = 'https://api.chimu.moe/v1/download/'
+download_url = ''
+
+
 @logger.catch
 def Backup_File_Check():
 	config = configparser.ConfigParser()
@@ -18,6 +42,7 @@ def Backup_File_Check():
 		print(backup_path)
 		if not os.path.isfile(f'{backup_path}/backup.txt'): # directory from config.ini
 			print('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
+			logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
 			input_data = input()
 			if not input_data == '': # input_data == nothing (user press ENTER without anything)
 				backup_path = str(input_data)
