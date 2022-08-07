@@ -28,11 +28,6 @@ config = {
 logger.configure(**config)
 
 
-beatconnect_url = 'https://beatconnect.io/b/'
-chimu_url = 'https://api.chimu.moe/v1/download/'
-download_url = ''
-
-
 @logger.catch
 def Backup_File_Check():
 	config = configparser.ConfigParser()
