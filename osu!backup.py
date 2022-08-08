@@ -30,7 +30,6 @@ logger.configure(**config)
 
 beatconnect_url = 'https://beatconnect.io/b/'
 chimu_url = 'https://api.chimu.moe/v1/download/'
-download_url = ''
 
 
 @logger.catch
@@ -65,9 +64,6 @@ class Create_backup:
 	def Beatmaps_Path_Check(self):
 		logger.info('Creating backup...')
 		Config_Manager.Info_parser(self)
-
-		if self.songs_path == 'default': 
-			self.songs_path = os.getenv('LOCALAPPDATA') + '/osu!/Songs'
 
 		if not os.path.exists(self.songs_path):
 			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
@@ -121,7 +117,7 @@ class Read_Backup:
 		Read_Backup.Backup_Parser(self)
 		Read_Backup.Remove_existing_beatmaps(self)
 		Read_Backup.Downloader(self)
-		logger.info('All beatmaps downloaded')
+		logger.success('All beatmaps downloaded')
 		logger.info('Press [ENTER] to exit.')
 		input()
 
@@ -141,7 +137,7 @@ class Read_Backup:
 
 		logger.info('Downloading beatmaps...')
 		for self.MapId in self.FilteredBeatmaps:
-			Read_Backup.Beatconnect_Parser(self)
+			Read_Backup.Beatmaps_Parser(self)
 		Read_Backup.Missed_Maps()
 
 
@@ -155,10 +151,11 @@ class Read_Backup:
 					self.FilteredBeatmaps[Beatmaps]=backup[Beatmaps]
 
 
-	def Beatconnect_Parser(self):
-		download_url = 'https://beatconnect.io/b/'
+	def Beatmaps_Parser(self):
+		Config_Manager.Info_parser(self)
+
 		try:
-			self.response = requests.get(download_url + self.MapId)
+			self.response = requests.get(self.download_url + self.MapId)
 		except requests.Timeout:
 			misslist_id.append(self.MapId)
 			misslist_title.append(backup[self.MapId])
@@ -191,7 +188,7 @@ class Read_Backup:
 	def Write_Beatmap(self):
 		with open(os.path.join(download_path, f'{self.MapId} {backup[self.MapId]}.osz'), 'wb') as f:
 			f.write(self.response.content)
-		logger.info("[FILE] dowloaded.")
+		logger.success("[FILE] dowloaded.")
 			
 
 	def Missed_Maps():	
@@ -237,18 +234,26 @@ class Config_Manager:
 		if self.backup_path == 'default':
 			self.backup_path = os.getcwd()
 
+		self.download_from = config.get('Settings', 'download_from')
+		if self.download_from == 'beatconnect':
+			self.download_url = beatconnect_url
+		elif self.download_from == 'chimu':
+			self.download_url = chimu_url
+
 
 	def Create_Config():
-		# Default config
-		template = {
+		default_params = {
 			'songs_path':'default', # default -> %LOCALAPPDATA%/osu!/Songs
 			'backup_path':'default', # default -> current directory
+			'download_from':'chimu' #Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]
 		}
 
-		config = configparser.ConfigParser()
+		config = configparser.ConfigParser(allow_no_value=True)
 		config.add_section('Settings')
-		config.set('Settings', 'songs_path', template['songs_path'])
-		config.set('Settings', 'backup_path', template['backup_path']) 
+		config.set('Settings', 'songs_path', default_params['songs_path'])
+		config.set('Settings', 'backup_path', default_params['backup_path'])
+		config.set('Settings', '#Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]')
+		config.set('Settings', 'download_from', default_params['download_from']) 
 		with open('config.ini', 'w') as config_file:
 			config.write(config_file)
 
@@ -269,7 +274,7 @@ def Main():
 	choice = int(choice)
 
 	if choice == 0:
-		logger.trace('Exot from programm')
+		logger.trace('Exit from programm')
 		sys.exit()
 	elif choice == 1:
 		Create_backup()
