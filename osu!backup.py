@@ -18,10 +18,11 @@ config = {
 	"handlers": [
 		{
 			"sink": sys.stderr,
-			"format": f"{logs_time_format} | {logs_level_format	} | {logs_message_format}"
+			"format": f"<{logs_level_format}> - <{logs_message_format}>"
 		},
 		{
 			"sink": logs_file_path + "{time}.log",
+			"level":"TRACE"
 		},
 	]
 }
@@ -33,37 +34,15 @@ chimu_url = 'https://api.chimu.moe/v1/download/'
 
 
 @logger.catch
-def Backup_File_Check():
-	config = configparser.ConfigParser()
-	config.read('config.ini')
-	if not os.path.isfile('backup.txt'): # current directory
-		backup_path = config.get('Settings', 'backup_path')
-		print(backup_path)
-		if not os.path.isfile(f'{backup_path}/backup.txt'): # directory from config.ini
-			print('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-			logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-			input_data = input()
-			if not input_data == '': # input_data == nothing (user press ENTER without anything)
-				backup_path = str(input_data)
-				config.set('Settings', 'backup_path', input_data)
-
-				with open('config.ini', 'w') as config_file:
-					config.write(config_file)
-				sys.exit()
-			else:
-				sys.exit()
-
-
-@logger.catch
 class Create_backup:
 	def __init__(self):
+		Config_Manager.Info_parser(self)
 		Create_backup.Beatmaps_Path_Check(self)
 		Create_backup.Write_Backup(self)
 
 
 	def Beatmaps_Path_Check(self):
 		logger.info('Creating backup...')
-		Config_Manager.Info_parser(self)
 
 		if not os.path.exists(self.songs_path):
 			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
@@ -79,7 +58,7 @@ class Create_backup:
 
 	def Write_Backup(self):
 		MAP_FOLDERS_LIST = os.listdir(str(self.songs_path))
-		MAP_id = []
+		MAP_ID = []
 		MAPNAME = []
 		forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
@@ -89,9 +68,9 @@ class Create_backup:
 			result = re.match(forbidden_chars, beatmaps)
 			if not result:
 				splitter = beatmaps.split(' ', 1)
-				MAP_id.append(splitter[0])
+				MAP_ID.append(splitter[0])
 				MAPNAME.append(splitter[-1])
-		result = json.dumps(dict(zip(MAP_id, MAPNAME)), sort_keys = False, indent=4)
+		result = json.dumps(dict(zip(MAP_ID, MAPNAME)), sort_keys = False, indent=4)
 
 		BACKUP = open('backup.txt', 'w')
 		BACKUP.write(str(result))
@@ -105,95 +84,109 @@ class Create_backup:
 
 @logger.catch
 class Read_Backup:
-	global misslist_id
-	global misslist_title
-	global download_path
-	download_path = os.getcwd() + '/backup_downloads'
-	misslist_id = []
-	misslist_title = []
-	backup = {}
-
 	def __init__(self):
+		self.misslist_id = []
+		self.misslist_title = []
+		self.backup = {}
+		self.download_path = os.getcwd() + '/backup_downloads'
+		
+		Config_Manager.Info_parser(self)
+		
+		Read_Backup.Backup_File_Check()
 		Read_Backup.Backup_Parser(self)
 		Read_Backup.Remove_existing_beatmaps(self)
 		Read_Backup.Downloader(self)
+
 		logger.success('All beatmaps downloaded')
 		logger.info('Press [ENTER] to exit.')
 		input()
 
 
-	def Backup_Parser(self):
-		Config_Manager.Info_parser(self)
+	def Backup_File_Check():
+		config = configparser.ConfigParser()
+		config.read('config.ini')
+		if not os.path.isfile('backup.txt'): # current directory
+			backup_path = config.get('Settings', 'backup_path')
+			if not os.path.isfile(f'{backup_path}/backup.txt'): # directory from config.ini
+				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
+				input_data = input()
+				if not input_data == '': # input_data == nothing (user press ENTER without anything)
+					backup_path = str(input_data)
+					config.set('Settings', 'backup_path', input_data)
+	
+					with open('config.ini', 'w') as config_file:
+						config.write(config_file)
+					sys.exit()
+				else:
+					sys.exit()
 
-		global backup
+
+	def Backup_Parser(self):
 		backup = open(f'{self.backup_path}/backup.txt', 'r').read()
-		backup = ast.literal_eval(backup)
+		self.backup = ast.literal_eval(backup)
 
 
 	def Downloader(self):
-		if not os.path.exists(download_path):
-			logger.info('Creating folder for beatmaps at ' + download_path)
-			os.makedirs(download_path)
+		if not os.path.exists(self.download_path):
+			logger.info('Creating folder for beatmaps at ' + self.download_path)
+			os.makedirs(self.download_path)
 
 		logger.info('Downloading beatmaps...')
 		for self.MapId in self.FilteredBeatmaps:
 			Read_Backup.Beatmaps_Parser(self)
-		Read_Backup.Missed_Maps()
+		Read_Backup.Missed_Maps(self)
 
 
 	def Remove_existing_beatmaps(self):
 		self.FilteredBeatmaps = {}
-		for Beatmaps in backup:
-			downloaded_file_path = f'{download_path}/{Beatmaps} {backup[Beatmaps]}.osz'
-			Local_songs_path = f'{self.songs_path}/{Beatmaps} {backup[Beatmaps]}'
+		for Beatmaps in self.backup:
+			downloaded_file_path = f'{self.download_path}/{Beatmaps} {self.backup[Beatmaps]}.osz'
+			Local_songs_path = f'{self.songs_path}/{Beatmaps} {self.backup[Beatmaps]}'
 			if not os.path.isdir(Local_songs_path):
 				if not os.path.isfile(downloaded_file_path): 
-					self.FilteredBeatmaps[Beatmaps]=backup[Beatmaps]
+					self.FilteredBeatmaps[Beatmaps]=self.backup[Beatmaps]
 
 
 	def Beatmaps_Parser(self):
-		Config_Manager.Info_parser(self)
-
 		try:
 			self.response = requests.get(self.download_url + self.MapId)
 		except requests.Timeout:
-			misslist_id.append(self.MapId)
-			misslist_title.append(backup[self.MapId])
+			self.misslist_id.append(self.MapId)
+			self.misslist_title.append(self.backup[self.MapId])
 			logger.exception('Connection Timeout. Reconnection in 2 minutes.')
 			time.sleep(120)
 
-		logger.info(f'[DOWNLOAD] {backup[self.MapId]}')
-		global status_code
-		status_code = self.response.status_code
-		if status_code != requests.codes.ok:
-			Read_Backup.Request_Errors(self)
+		logger.info(f'[DOWNLOAD] {self.backup[self.MapId]}')
+		self.status_code = self.response.self.status_code
+		if self.status_code != requests.codes.ok:
+			Read_backup.Request_Errors(self)
 		else:
 			Read_Backup.Write_Beatmap(self)
 		time.sleep(30)
 
 
 	def Request_Errors(self):
-		if status_code == 404:
-			logger.error(f'File <{backup[self.MapId]}> failed to download.')
-			misslist_id.append(self.MapId)
-			misslist_title.append(backup[self.MapId])
+		if self.status_code == 404:
+			logger.error(f'File <{self.backup[self.MapId]}> failed to download.')
+			self.misslist_id.append(self.MapId)
+			self.misslist_title.append(self.backup[self.MapId])
 
-		elif status_code == 502:
+		elif self.status_code == 502:
 			logger.error("somthing went wrong with connection, we will try again after 60 seconds.")
-			misslist_id.append(self.MapId)
-			misslist_title.append(backup[self.MapId])
+			self.misslist_id.append(self.MapId)
+			self.misslist_title.append(self.backup[self.MapId])
 			time.sleep(60)
 
 
 	def Write_Beatmap(self):
-		with open(os.path.join(download_path, f'{self.MapId} {backup[self.MapId]}.osz'), 'wb') as f:
+		with open(os.path.join(self.download_path, f'{self.MapId} {self.backup[self.MapId]}.osz'), 'wb') as f:
 			f.write(self.response.content)
 		logger.success("[FILE] dowloaded.")
 			
 
-	def Missed_Maps():	
-		if misslist_id and misslist_title != None:
-			result = json.dumps(dict(zip(misslist_id, misslist_title)), sort_keys = False, indent=4)
+	def Missed_Maps(self):	
+		if self.misslist_id and self.misslist_title != None:
+			result = json.dumps(dict(zip(self.misslist_id, self.misslist_title)), sort_keys = False, indent=4)
 			with open('missing_beatmaps.txt', 'w') as f:
 				f.write(result)
 			logger.warning('Some beatmaps are not downloaded. Try to install them manually on "https://osu.ppy.sh/beatmapsets"')
@@ -203,8 +196,6 @@ class Read_Backup:
 class Config_Manager:
 	def __init__(self):
 		Config_Manager.Load_Config_Check()
-		Config_Manager.Info_parser(self)
-
 
 	def Load_Config_Check():
 		config = configparser.ConfigParser()
@@ -220,7 +211,24 @@ class Config_Manager:
 		except FileNotFoundError:
 			logger.error('config file not found')
 			Config_Manager.Create_Config()
+
 	
+	def Create_Config():
+		default_params = {
+			'songs_path':'default', # default -> %LOCALAPPDATA%/osu!/Songs
+			'backup_path':'default', # default -> current directory
+			'download_from':'chimu' #Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]
+		}
+
+		config = configparser.ConfigParser(allow_no_value=True)
+		config.add_section('Settings')
+		config.set('Settings', 'songs_path', default_params['songs_path'])
+		config.set('Settings', 'backup_path', default_params['backup_path'])
+		config.set('Settings', '#Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]')
+		config.set('Settings', 'download_from', default_params['download_from']) 
+		with open('config.ini', 'w') as config_file:
+			config.write(config_file)
+
 
 	def Info_parser(self):
 		config = configparser.ConfigParser()
@@ -239,23 +247,6 @@ class Config_Manager:
 			self.download_url = beatconnect_url
 		elif self.download_from == 'chimu':
 			self.download_url = chimu_url
-
-
-	def Create_Config():
-		default_params = {
-			'songs_path':'default', # default -> %LOCALAPPDATA%/osu!/Songs
-			'backup_path':'default', # default -> current directory
-			'download_from':'chimu' #Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]
-		}
-
-		config = configparser.ConfigParser(allow_no_value=True)
-		config.add_section('Settings')
-		config.set('Settings', 'songs_path', default_params['songs_path'])
-		config.set('Settings', 'backup_path', default_params['backup_path'])
-		config.set('Settings', '#Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]')
-		config.set('Settings', 'download_from', default_params['download_from']) 
-		with open('config.ini', 'w') as config_file:
-			config.write(config_file)
 
 
 @logger.catch
@@ -279,8 +270,8 @@ def Main():
 	elif choice == 1:
 		Create_backup()
 	elif choice == 2:
-		Backup_File_Check()
 		Read_Backup()
+
 
 if __name__ == "__main__":
 	Config_Manager()
