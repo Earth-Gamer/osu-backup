@@ -4,15 +4,43 @@ from loguru import logger
 
 from . import interface
 
+
+
 @logger.catch
-def Menu_Parser():
+def Main_Menu_Parser():
 	config = configparser.ConfigParser()
 	config.read('config.ini')
-
 	for value in config['Settings']:
-		# result = config.get('Settings')
-		interface.Settings_Menu_choices.append(value)
+		interface.config_variables.append(value)
 
 @logger.catch
-def Change_Settings(action):
-	pass
+class ChangeCofigParams:
+	def Option_Parser(option):
+		config = configparser.ConfigParser()
+		config.read('config.ini')
+
+		option_data = config.get('Settings', option)
+		return option_data
+
+	def Write_Settings(option, action):
+		config = configparser.ConfigParser()
+		config.read('config.ini')
+
+		config.set('Settings', option, action)
+		with open('config.ini', 'w') as config_file:
+			config.write(config_file)
+
+
+
+# do same as ChangeCofigParams()
+
+# @logger.catch
+# class ChangeFilePath:
+# 	def Option_Parser(option):
+# 		option_data = config.get('Settings', option)
+# 		return option_data
+
+# 	def WriteFilePath(option, action):
+# 		config.set('Settings', option, action)
+# 		with open('config.ini', 'w') as config_file:
+# 			config.write(config_file)

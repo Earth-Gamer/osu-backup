@@ -1,5 +1,6 @@
 import configparser
 import sys
+import json
 
 from loguru import logger
 
@@ -19,6 +20,7 @@ config = {
 		},
 		{
 			"sink": logs_file_path + "{time}.log",
+			"format":f"{logs_time_format} | {logs_level_format} | {logs_message_format}",
 			"level":"TRACE"
 		},
 	]
