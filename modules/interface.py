@@ -127,7 +127,7 @@ class ChangePathMenu:
 	def FileDialogChoice(action):
 		logger.trace("FileDialogChoice")
 		option = action
-		action = ChangePathMenu.FileDialog()
+		action = ChangePathMenu.FileDialog(option)
 		if action == '':
 			logger.error("Input is empty!")
 			ChangePathMenu.Menu(option)
@@ -140,10 +140,13 @@ class ChangePathMenu:
 			Settings.ChangeCofigParams.Write_Settings(option, action)
 		Main_Menu()
 
-	def FileDialog():
+	def FileDialog(option):
 		root = tk.Tk()
 		root.withdraw()
-		file_path = filedialog.askopenfilename()
+		if option == 'songs_path':
+			file_path = filedialog.askdirectory()
+		elif option == 'backup_path':
+			file_path = filedialog.askopenfilename()
 		return file_path
 
 	def FilePath_Menu(option):
