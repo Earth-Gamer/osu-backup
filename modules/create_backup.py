@@ -8,6 +8,7 @@ import configparser
 from loguru import logger
 
 from . import config_manager as cfg
+from . import interface
 
 @logger.catch
 class Create_backup:
@@ -17,21 +18,15 @@ class Create_backup:
 		Create_backup.Write_Backup(self)
 
 	def Beatmaps_Path_Check(self):
-		logger.info('Creating backup...')
 
 		if not os.path.exists(self.songs_path):
 			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
 			logger.info('Example: C:/Users/username/AppData/local/osu!/Songs.')
-
-			input_data = input()
-			self.songs_path = str(input_data)
-			config.set('Settings', 'songs_path', input_data)
-
-			with open('config.ini', 'w') as config_file:
-				config.write(config_file)
+			interface.ChangePathMenu.DirPath_Menu("songs_path")
 
 
 	def Write_Backup(self):
+		logger.info('Creating backup...')
 		MAP_FOLDERS_LIST = os.listdir(str(self.songs_path))
 		MAP_ID = []
 		MAPNAME = []

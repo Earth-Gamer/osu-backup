@@ -8,7 +8,8 @@ import configparser
 import requests
 from loguru import logger
 
-from . import config_manager as cfg	
+from . import config_manager as cfg
+from . import interface
 
 @logger.catch
 class Read_Backup:
@@ -37,16 +38,7 @@ class Read_Backup:
 			backup_path = config.get('Settings', 'backup_path')
 			if not os.path.isfile(f'{backup_path}/backup.txt'): # directory from config.ini
 				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-				input_data = input()
-				if not input_data == '': # input_data == nothing (user press ENTER without anything)
-					backup_path = str(input_data)
-					config.set('Settings', 'backup_path', input_data)
-	
-					with open('config.ini', 'w') as config_file:
-						config.write(config_file)
-					sys.exit()
-				else:
-					sys.exit()
+				interface.ChangePathMenu.FilePath_Menu("backup_path")
 
 
 	def Backup_Parser(self):

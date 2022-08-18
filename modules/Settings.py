@@ -30,17 +30,4 @@ class ChangeCofigParams:
 		with open('config.ini', 'w') as config_file:
 			config.write(config_file)
 
-
-
-# do same as ChangeCofigParams()
-
-# @logger.catch
-# class ChangeFilePath:
-# 	def Option_Parser(option):
-# 		option_data = config.get('Settings', option)
-# 		return option_data
-
-# 	def WriteFilePath(option, action):
-# 		config.set('Settings', option, action)
-# 		with open('config.ini', 'w') as config_file:
-# 			config.write(config_file)
+		logger.info("Settings changed")
