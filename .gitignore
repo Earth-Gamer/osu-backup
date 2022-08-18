@@ -10,8 +10,7 @@ backup_downloads
 Logs
 dist
 osu!backup.spec
-
 build/osu!backup
 include/site/python3.10/greenlet
-output
 __pycache__
+output
