@@ -35,3 +35,6 @@ def main():
 	logger.trace(f'version: {version}')
 	cfg.Config_Manager()
 	interface.Main_Menu()
+
+if __name__ == "__main__":
+	main()
