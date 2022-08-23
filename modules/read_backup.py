@@ -36,13 +36,13 @@ class Read_Backup:
 		config.read('config.ini')
 		if not os.path.isfile('backup.txt'): # current directory
 			backup_path = config.get('Settings', 'backup_path')
-			if not os.path.isfile(f'{backup_path}/backup.txt'): # directory from config.ini
+			if not os.path.isfile(backup_path): # directory from config.ini
 				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-				interface.ChangePathMenu.FilePath_Menu("backup_path")
+				interface.ChangePathMenu.Menu("backup_path")
 
 
 	def Backup_Parser(self):
-		backup = open(f'{self.backup_path}/backup.txt', 'r').read()
+		backup = open(self.backup_path, 'r').read()
 		self.backup = ast.literal_eval(backup)
 
 
@@ -72,12 +72,13 @@ class Read_Backup:
 			self.response = requests.get(self.download_url + self.MapId)
 		except requests.Timeout:
 			self.misslist_id.append(self.MapId)
-			self.misslist_title.append(self.backup[self.MapId])
+			self.misslist_title.append(self.FilteredBeatmaps[self.MapId])
 			logger.exception('Connection Timeout. Reconnection in 2 minutes.')
 			time.sleep(120)
 
-		logger.info(f'[DOWNLOAD] {self.backup[self.MapId]}')
+		logger.info(f'[DOWNLOAD] {self.FilteredBeatmaps[self.MapId]}')
 		self.status_code = self.response.status_code
+		logger.trace(self.status_code)
 		if self.status_code != requests.codes.ok:
 			Read_Backup.Request_Errors(self)
 		else:
@@ -87,19 +88,19 @@ class Read_Backup:
 
 	def Request_Errors(self):
 		if self.status_code == 404:
-			logger.error(f'File <{self.backup[self.MapId]}> failed to download.')
+			logger.error(f'File <{self.FilteredBeatmaps[self.MapId]}> failed to download.')
 			self.misslist_id.append(self.MapId)
-			self.misslist_title.append(self.backup[self.MapId])
+			self.misslist_title.append(self.FilteredBeatmaps[self.MapId])
 
 		elif self.status_code == 502:
 			logger.error("somthing went wrong with connection, we will try again after 60 seconds.")
 			self.misslist_id.append(self.MapId)
-			self.misslist_title.append(self.backup[self.MapId])
+			self.misslist_title.append(self.FilteredBeatmaps[self.MapId])
 			time.sleep(60)
 
 
 	def Write_Beatmap(self):
-		with open(os.path.join(self.download_path, f'{self.MapId} {self.backup[self.MapId]}.osz'), 'wb') as f:
+		with open(os.path.join(self.download_path, f'{self.MapId} {self.FilteredBeatmaps[self.MapId]}.osz'), 'wb') as f:
 			f.write(self.response.content)
 		logger.success("[FILE] dowloaded.")
 			

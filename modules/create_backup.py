@@ -22,7 +22,7 @@ class Create_backup:
 		if not os.path.exists(self.songs_path):
 			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
 			logger.info('Example: C:/Users/username/AppData/local/osu!/Songs.')
-			interface.ChangePathMenu.DirPath_Menu("songs_path")
+			interface.ChangePathMenu.Menu("songs_path")
 
 
 	def Write_Backup(self):
@@ -30,6 +30,7 @@ class Create_backup:
 		MAP_FOLDERS_LIST = os.listdir(str(self.songs_path))
 		MAP_ID = []
 		MAPNAME = []
+		filtered_mapname = []
 		forbidden_chars = '[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]'
 
 		time.sleep(1)
@@ -40,7 +41,15 @@ class Create_backup:
 				splitter = beatmaps.split(' ', 1)
 				MAP_ID.append(splitter[0])
 				MAPNAME.append(splitter[-1])
-		result = json.dumps(dict(zip(MAP_ID, MAPNAME)), sort_keys = False, indent=4)
+
+		for name in MAPNAME:
+			if name.find('[no video]') != -1:
+				result = name.replace('[no video]', '')
+				result = result.strip()
+				filtered_mapname.append(result)
+
+
+		result = json.dumps(dict(zip(MAP_ID, filtered_mapname)), sort_keys = False, indent=4)
 
 		BACKUP = open('backup.txt', 'w')
 		BACKUP.write(str(result))

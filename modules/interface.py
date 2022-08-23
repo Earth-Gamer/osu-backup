@@ -116,7 +116,7 @@ class ChangePathMenu:
 		if action == 'Return':
 			Settings_Menu()
 		elif action == 'Browse':
-			ChangePathMenu.FileDialogChoice(action)
+			ChangePathMenu.FileDialogChoice(option)
 		elif action == 'Type manually':
 			if option == 'songs_path':
 				ChangePathMenu.DirPath_Menu(option)
@@ -148,6 +148,7 @@ class ChangePathMenu:
 		elif option == 'backup_path':
 			file_path = filedialog.askopenfilename()
 		return file_path
+
 
 	def FilePath_Menu(option):
 		logger.trace("FilePath_Menu")
