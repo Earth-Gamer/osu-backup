@@ -42,7 +42,7 @@ class Read_Backup:
 
 
 	def Backup_Parser(self):
-		backup = open(self.backup_path, 'r').read()
+		backup = open(f'{self.backup_path}/backup.txt', 'r').read()
 		self.backup = ast.literal_eval(backup)
 
 
