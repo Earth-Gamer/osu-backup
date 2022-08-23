@@ -79,7 +79,7 @@ class Read_Backup:
 		logger.info(f'[DOWNLOAD] {self.backup[self.MapId]}')
 		self.status_code = self.response.status_code
 		if self.status_code != requests.codes.ok:
-			Read_backup.Request_Errors(self)
+			Read_Backup.Request_Errors(self)
 		else:
 			Read_Backup.Write_Beatmap(self)
 		time.sleep(30)
