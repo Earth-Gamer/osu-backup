@@ -20,8 +20,6 @@ class Read_Backup:
 		self.download_path = os.getcwd() + '/backup_downloads'
 		
 		cfg.Config_Manager.Info_parser(self)
-		
-		Read_Backup.Backup_File_Check()
 		Read_Backup.Backup_Parser(self)
 		Read_Backup.Remove_existing_beatmaps(self)
 		Read_Backup.Downloader(self)
@@ -31,19 +29,19 @@ class Read_Backup:
 		input()
 
 
-	def Backup_File_Check():
-		config = configparser.ConfigParser()
-		config.read('config.ini')
-		if not os.path.isfile('backup.txt'): # current directory
-			backup_path = config.get('Settings', 'backup_path')
-			if not os.path.isfile(backup_path): # directory from config.ini
-				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-				interface.ChangePathMenu.Menu("backup_path")
-
-
 	def Backup_Parser(self):
-		backup = open(f'{self.backup_path}/backup.txt', 'r').read()
+		backup = open(self.backup_path, 'r').read()
 		self.backup = ast.literal_eval(backup)
+
+
+	def Remove_existing_beatmaps(self):
+		self.FilteredBeatmaps = {}
+		for Beatmaps in self.backup:
+			downloaded_file_path = f'{self.download_path}/{Beatmaps} {self.backup[Beatmaps]}.osz'
+			Local_songs_path = f'{self.songs_path}/{Beatmaps} {self.backup[Beatmaps]}'
+			if not os.path.isdir(Local_songs_path):
+				if not os.path.isfile(downloaded_file_path): 
+					self.FilteredBeatmaps[Beatmaps]=self.backup[Beatmaps]
 
 
 	def Downloader(self):
@@ -55,16 +53,6 @@ class Read_Backup:
 		for self.MapId in self.FilteredBeatmaps:
 			Read_Backup.Beatmaps_Parser(self)
 		Read_Backup.Missed_Maps(self)
-
-
-	def Remove_existing_beatmaps(self):
-		self.FilteredBeatmaps = {}
-		for Beatmaps in self.backup:
-			downloaded_file_path = f'{self.download_path}/{Beatmaps} {self.backup[Beatmaps]}.osz'
-			Local_songs_path = f'{self.songs_path}/{Beatmaps} {self.backup[Beatmaps]}'
-			if not os.path.isdir(Local_songs_path):
-				if not os.path.isfile(downloaded_file_path): 
-					self.FilteredBeatmaps[Beatmaps]=self.backup[Beatmaps]
 
 
 	def Beatmaps_Parser(self):

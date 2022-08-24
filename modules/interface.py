@@ -35,7 +35,9 @@ def Main_Menu():
 	).execute()
 	logger.trace(f"action is: {action}")
 
-	if action == Main_Menu_choices[0]:
+	if action == None:
+		sys.exit()
+	elif action == Main_Menu_choices[0]:
 		create_backup.Create_backup()
 	elif action == Main_Menu_choices[1]:
 		read_backup.Read_Backup()
@@ -85,10 +87,11 @@ def ChangeUsingChoiceMenu(action):
 	).execute()
 	logger.trace(f"action is:{action}")
 
-	if action == "Return":
+	if action == None:
+		sys.exit()
+	elif action == "Return":
 		Settings_Menu()
-
-	if action == option_data:
+	elif action == option_data:
 		logger.error('You cannot change the value to itself')
 		Settings_Menu()
 	else:

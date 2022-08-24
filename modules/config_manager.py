@@ -3,6 +3,8 @@ import configparser
 
 from loguru import logger
 
+from modules import interface
+
 beatconnect_url = 'https://beatconnect.io/b/'
 chimu_url = 'https://api.chimu.moe/v1/download/'
 
@@ -48,13 +50,26 @@ class Config_Manager:
 		config = configparser.ConfigParser()
 		config.read('config.ini')
 
+
 		self.songs_path = config.get('Settings', 'songs_path')
 		if self.songs_path == 'default':
 			self.songs_path = os.getenv('LOCALAPPDATA') + '/osu!/Songs'
+
+		if not os.path.exists(self.songs_path):
+			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
+			logger.info('Example: C:/Users/username/AppData/local/osu!/Songs.')
+			interface.ChangePathMenu.Menu("songs_path")
 		
+
 		self.backup_path = config.get('Settings', 'backup_path')
 		if self.backup_path == 'default':
-			self.backup_path = os.getcwd()
+			self.backup_path = os.getcwd() + '/backup.txt'
+
+		if not os.path.isfile('backup.txt'): # current directory
+			if not os.path.isfile(self.backup_path): # directory from config.ini
+				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
+				interface.ChangePathMenu.Menu("backup_path")
+
 
 		self.download_from = config.get('Settings', 'download_from')
 		if self.download_from == 'beatconnect':
