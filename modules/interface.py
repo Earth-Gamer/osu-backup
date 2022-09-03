@@ -112,7 +112,6 @@ class ChangePathMenu:
 				Separator(),
 				Choice(value='Return', name='Return'),
 			],
-			instruction = 'ctrl + z'
 		).execute()
 		logger.trace(f'action is: {action}')
 
@@ -169,8 +168,6 @@ class ChangePathMenu:
 			logger.error("Input is empty!")
 			Settings_Menu()
 		Main_Menu()
-
-
 
 
 	def DirPath_Menu(option):

@@ -1,5 +1,7 @@
 import os
+import sys
 import configparser
+import time
 
 from loguru import logger
 
@@ -33,7 +35,7 @@ class Config_Manager:
 		default_params = {
 			'songs_path':'default', # default -> %LOCALAPPDATA%/osu!/Songs
 			'backup_path':'default', # default -> current directory
-			'download_from':'chimu' #Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]
+			'download_from':'beatconnect', #Options ["beatconnect" -> Beatconnect.io] ["chimu" -> Chimu.moe]
 		}
 
 		config = configparser.ConfigParser(allow_no_value=True)
@@ -50,29 +52,30 @@ class Config_Manager:
 		config = configparser.ConfigParser()
 		config.read('config.ini')
 
-
 		self.songs_path = config.get('Settings', 'songs_path')
 		if self.songs_path == 'default':
 			self.songs_path = os.getenv('LOCALAPPDATA') + '/osu!/Songs'
 
-		if not os.path.exists(self.songs_path):
-			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
-			logger.info('Example: C:/Users/username/AppData/local/osu!/Songs.')
-			interface.ChangePathMenu.Menu("songs_path")
-		
-
 		self.backup_path = config.get('Settings', 'backup_path')
 		if self.backup_path == 'default':
 			self.backup_path = os.getcwd() + '/backup.txt'
-
-		if not os.path.isfile('backup.txt'): # current directory
-			if not os.path.isfile(self.backup_path): # directory from config.ini
-				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
-				interface.ChangePathMenu.Menu("backup_path")
-
 
 		self.download_from = config.get('Settings', 'download_from')
 		if self.download_from == 'beatconnect':
 			self.download_url = beatconnect_url
 		elif self.download_from == 'chimu':
 			self.download_url = chimu_url
+
+
+	def BackupFileCheck(self):
+		if not os.path.isfile('backup.txt'): # current directory
+			if not os.path.isfile(self.backup_path): # directory from config.ini
+				logger.error('Failed to find the backup file. Place the backup file in the same folder as the program, and close the program, or enter the backup path here.\nTo close the program press [ENTER].')
+				interface.ChangePathMenu.Menu("backup_path")
+
+
+	def SongsPathCheck(self):
+		if not os.path.exists(self.songs_path):
+			logger.error(f'[ERROR]: Path {self.songs_path} does not exist. Type correct path and try again.')
+			logger.info('Example: C:/Users/username/AppData/local/osu!/Songs.')
+			interface.ChangePathMenu.Menu("songs_path")

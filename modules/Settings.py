@@ -5,7 +5,6 @@ from loguru import logger
 from . import interface
 
 
-
 @logger.catch
 def Main_Menu_Parser():
 	config = configparser.ConfigParser()

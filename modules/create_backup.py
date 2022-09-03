@@ -14,6 +14,7 @@ from . import interface
 class Create_backup:
 	def __init__(self):
 		cfg.Config_Manager.Info_parser(self)
+		cfg.Config_Manager.SongsPathCheck(self)
 		Create_backup.Write_Backup(self)
 
 

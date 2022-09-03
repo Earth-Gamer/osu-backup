@@ -20,6 +20,8 @@ class Read_Backup:
 		self.download_path = os.getcwd() + '/backup_downloads'
 		
 		cfg.Config_Manager.Info_parser(self)
+		cfg.Config_Manager.SongsPathCheck(self)
+		cfg.Config_Manager.BackupFileCheck(self)
 		Read_Backup.Backup_Parser(self)
 		Read_Backup.Remove_existing_beatmaps(self)
 		Read_Backup.Downloader(self)
@@ -56,6 +58,7 @@ class Read_Backup:
 
 
 	def Beatmaps_Parser(self):
+		logger.trace(self.download_from)
 		try:
 			self.response = requests.get(self.download_url + self.MapId)
 		except requests.Timeout:
@@ -75,16 +78,10 @@ class Read_Backup:
 
 
 	def Request_Errors(self):
-		if self.status_code == 404:
-			logger.error(f'File <{self.FilteredBeatmaps[self.MapId]}> failed to download.')
-			self.misslist_id.append(self.MapId)
-			self.misslist_title.append(self.FilteredBeatmaps[self.MapId])
-
-		elif self.status_code == 502:
-			logger.error("somthing went wrong with connection, we will try again after 60 seconds.")
-			self.misslist_id.append(self.MapId)
-			self.misslist_title.append(self.FilteredBeatmaps[self.MapId])
-			time.sleep(60)
+		logger.trace(f'status code is: {self.status_code}')
+		logger.error(f'File <{self.FilteredBeatmaps[self.MapId]}> failed to download.')
+		self.misslist_id.append(self.MapId)
+		self.misslist_title.append(self.FilteredBeatmaps[self.MapId])
 
 
 	def Write_Beatmap(self):
